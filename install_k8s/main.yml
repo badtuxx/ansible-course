@@ -1,0 +1,31 @@
+---
+- hosts: all
+  become: yes
+  remote_user: ubuntu
+  gather_facts: no
+  pre_tasks:
+
+    - name: 'Atualizando o repo'
+      raw: 'apt-get update'
+    - name: 'Instalando Pyhton'
+      raw: 'apt-get install -y python'
+
+  roles:
+    - { role: install-k8s, tags: ["install_k8s_role"] }   
+
+- hosts: k8s-master
+  become: yes 
+  user: ubuntu
+  roles:
+  
+    - { role: create-cluster, tags: ["create_cluster_role"] }
+    - { role: install-helm, tags: ["install_helm_role"] }
+
+- hosts: k8s-workers
+  become: yes
+  user: ubuntu
+  roles: 
+  
+    - { role: join-workers, tags: ["join_workers_role"] }
+
+
